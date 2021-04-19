@@ -22,3 +22,12 @@ Age：年龄
 Outcome：0表示不患病，1表示患病。
 
 任务：建立机器学习模型以准确预测数据集中的患者是否患有糖尿病
+
+实验环境：
+python3.5.6 + jupyter
+
+数据处理 pandas、numpy
+
+可视化 matplotlib、seaborn
+
+模型构建 sklearn
