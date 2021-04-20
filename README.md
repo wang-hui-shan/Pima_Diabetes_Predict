@@ -13,7 +13,7 @@ Insulin：两个小时血清胰岛素(μU/毫升)
 
 BMI：身体质量指数，体重除以身高的平方
 
-Diabets Pedigree Function: 疾病血统指数是否和遗传相关
+Diabets Pedigree Function: 疾病血统指数
 
 Height：身高(厘米)
 
