@@ -174,3 +174,23 @@ estimators = [
 model = StackingClassifier(estimators=estimators, final_estimator=SVC())
 model_score = cross_validate(model,feture_data, label,scoring=scores)
 print("test_Accuracy : {}\ntest_AUC : {}".format(model_score['test_Accuracy'].mean(),model_score['test_AUC'].mean()))
+
+"""
+SVC(C=1.405050505050505)
+
+
+test_Accuracy : 0.7953321596244133
+test_AUC : 0.7133755225726653
+LogisticRegression(C=0.17676767676767677)
+
+
+test_Accuracy : 0.8037593896713616
+test_AUC : 0.7383398763141622
+
+RandomForestClassifier(min_samples_split=8, n_estimators=30)
+test_Accuracy : 0.8018609806990089
+test_AUC : 0.7397995052566483
+
+test_Accuracy : 0.8145148669796557
+test_AUC : 0.751543599257885
+"""
