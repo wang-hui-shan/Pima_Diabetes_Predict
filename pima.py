@@ -153,8 +153,8 @@ params = {"n_estimators":[x for x in range(30,50,2)],'min_samples_split':[x for 
 model = RandomForestClassifier()
 RFC_grid_search = train(model,params)
 plt.figure()
-sns.lineplot(x=[x for x in range(len(grid_search.cv_results_['mean_test_score']))],
-             y=grid_search.cv_results_['mean_test_score'])
+sns.lineplot(x=[x for x in range(len(RFC_grid_search.cv_results_['mean_test_score']))],
+             y=RFC_grid_search.cv_results_['mean_test_score'])
 plt.show()
 
 estimators = [
