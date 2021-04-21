@@ -1,4 +1,4 @@
-import pandas as pd
+"""import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -8,7 +8,7 @@ from sklearn.model_selection import cross_validate,GridSearchCV
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier,StackingClassifier
+from sklearn.ensemble import RandomForestClassifier,StackingClassifier"""
 
 # 读取数据
 all_data = pd.read_csv('data.csv')
@@ -59,11 +59,11 @@ def knn_method():
     # 用KNNImputer 填充 Insulin SkinThickness
     corr_SkinThickness = ['BMI', 'Glucose','BloodPressure', 'SkinThickness']
     # 权重按距离的倒数表示。在这种情况下，查询点的近邻比远处的近邻具有更大的影响力
-    SkinThickness_imputer = KNNImputer(n_neighbors = 16,weights = 'distance')
+    SkinThickness_imputer = KNNImputer(weights = 'distance')
     all_data[corr_SkinThickness] = SkinThickness_imputer.fit_transform(all_data[corr_SkinThickness])
 
     corr_Insulin = ['Glucose', 'BMI','BloodPressure', 'Insulin']
-    Insulin_imputer = KNNImputer(n_neighbors = 16,weights = 'distance')
+    Insulin_imputer = KNNImputer(weights = 'distance')
     all_data[corr_Insulin] = Insulin_imputer.fit_transform(all_data[corr_Insulin])
 	
 from sklearn.ensemble import RandomForestRegressor
@@ -99,8 +99,8 @@ def predict_method(feature):
     pre_value = fill_model.predict(pre_feature)
     all_data.loc[predict_index,feature] = pre_value
 
-# drop_method()
-median_method()
+drop_method()
+# median_method()
 # knn_method()
 
 """
@@ -126,43 +126,51 @@ feture_data['weight'] = (0.01*feture_data['Height'])**2 * feture_data['BMI']
 Std = StandardScaler()
 feture_data = Std.fit_transform(feture_data)
 
+from sklearn.metrics import make_scorer,accuracy_score,roc_auc_score
+
+scores = {'AUC': make_scorer(roc_auc_score), 'Accuracy': make_scorer(accuracy_score)}
+
 def train(model, params):
-    grid_search = GridSearchCV(estimator = model, param_grid = params, cv = 5)
+    grid_search = GridSearchCV(estimator = model, param_grid = params,scoring=scores,refit='Accuracy')
     grid_search.fit(feture_data,label)
-    print(grid_search.best_params_)
-    model_score = cross_validate(grid_search.best_estimator_,feture_data, label, cv=5)
-    print(model_score['test_score'])
-    print("mean test score :{}".format(model_score['test_score'].mean()))
+    print(grid_search.best_estimator_)
     return grid_search
 
+def paint(x,y):
+    plt.figure()
+    sns.lineplot(x=x,y=y)
+    plt.show()
+    
+# svc
 model = SVC()
 params  =  {'C':np.linspace(0.1, 2, 100)}
 SVC_grid_search = train(model,params)
-plt.figure()
-sns.lineplot(x=[x for x in range(100)],y=SVC_grid_search.cv_results_['mean_test_score'])
-plt.show()
+                        
+paint([x for x in range(100)],SVC_grid_search.cv_results_['mean_test_Accuracy'])
+paint([x for x in range(100)],SVC_grid_search.cv_results_['mean_test_AUC'])
+print("test_Accuracy : {}\ntest_AUC : {}".format(SVC_grid_search.cv_results_['mean_test_Accuracy'].mean(),SVC_grid_search.cv_results_['mean_test_AUC'].mean()))               
 
-params = {"C":np.linspace(0.1,2,100)}
+# LogisticRegression
 model = LogisticRegression()
+params = {"C":np.linspace(0.1,2,100)}
 LR_grid_search = train(model,params)
-plt.figure()
-sns.lineplot(x=[x for x in range(100)],y=LR_grid_search.cv_results_['mean_test_score'])
-plt.show()
+                        
+paint([x for x in range(100)],LR_grid_search.cv_results_['mean_test_Accuracy'])
+paint([x for x in range(100)],LR_grid_search.cv_results_['mean_test_AUC'])
+print("test_Accuracy : {}\ntest_AUC : {}".format(LR_grid_search.cv_results_['mean_test_Accuracy'].mean(),LR_grid_search.cv_results_['mean_test_AUC'].mean()))               
 
-params = {"n_estimators":[x for x in range(30,50,2)],'min_samples_split':[x for x in range(4,10)]}
+# RandomForestClassifier
 model = RandomForestClassifier()
+params = {"n_estimators":[x for x in range(30,50,2)],'min_samples_split':[x for x in range(4,10)]}
 RFC_grid_search = train(model,params)
-plt.figure()
-sns.lineplot(x=[x for x in range(len(RFC_grid_search.cv_results_['mean_test_score']))],
-             y=RFC_grid_search.cv_results_['mean_test_score'])
-plt.show()
+print("test_Accuracy : {}\ntest_AUC : {}".format(RFC_grid_search.cv_results_['mean_test_Accuracy'].mean(),RFC_grid_search.cv_results_['mean_test_AUC'].mean()))               
 
+# StackingClassifier
 estimators = [
     ('SVC',SVC_grid_search.best_estimator_),
     ('NB', LR_grid_search.best_estimator_),
     ('RFC', RFC_grid_search.best_estimator_)
 ]
 model = StackingClassifier(estimators=estimators, final_estimator=SVC())
-model_score = cross_validate(model,feture_data, label, cv=5)
-print(model_score['test_score'])
-print("mean test score :{}".format(model_score['test_score'].mean()))
+model_score = cross_validate(model,feture_data, label,scoring=scores)
+print("test_Accuracy : {}\ntest_AUC : {}".format(model_score['test_Accuracy'].mean(),model_score['test_AUC'].mean()))
