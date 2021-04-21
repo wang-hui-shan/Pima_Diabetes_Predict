@@ -102,15 +102,12 @@ def predict_method(feature):
 # drop_method()
 median_method()
 # knn_method()
+
 """
 #用随机森林的方法填充缺失值较多的 SkinThickness 和 Insulin 缺失值
 predict_method("Insulin")
 predict_method("SkinThickness")
 # 其余值中值填充
-"""
-imp_mean = SimpleImputer(missing_values=np.nan, strategy='mean')
-clean_data = imp_mean.fit_transform(all_data)
-"""
 for column in list(all_data.columns[all_data.isnull().sum() > 0]):
     median = all_data[column].median()
     all_data[column].fillna(median, inplace=True)
