@@ -127,7 +127,7 @@ Std = StandardScaler()
 feture_data = Std.fit_transform(feture_data)
 
 def train(model, params):
-    grid_search = GridSearchCV(estimator = model, param_grid = params, cv = kfold)
+    grid_search = GridSearchCV(estimator = model, param_grid = params, cv = 5)
     grid_search.fit(feture_data,label)
     print(grid_search.best_params_)
     model_score = cross_validate(grid_search.best_estimator_,feture_data, label, cv=5)
